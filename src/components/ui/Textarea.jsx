@@ -1,0 +1,13 @@
+import { cn } from "../../lib/utils";
+
+export function Textarea({ className, ...props }) {
+  return (
+    <textarea
+      className={cn(
+        "min-h-24 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition placeholder:text-slate-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-[#4a7378] dark:bg-[#0b1518] dark:text-slate-100 dark:placeholder:text-[#8fa2a7] dark:focus:border-[#48d6c9] dark:focus:ring-[#0d3435]",
+        className
+      )}
+      {...props}
+    />
+  );
+}
