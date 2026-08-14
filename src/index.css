@@ -104,6 +104,16 @@
   color: #a7eee5;
 }
 
+.dark .finance-chart-surface .recharts-cartesian-axis-tick-value,
+.dark .finance-chart-surface .recharts-legend-item-text {
+  fill: #d8e6e9 !important;
+  color: #d8e6e9 !important;
+}
+
+.dark .finance-chart-surface .recharts-cartesian-grid line {
+  stroke: #35585e;
+}
+
 body {
   margin: 0;
   min-width: 320px;

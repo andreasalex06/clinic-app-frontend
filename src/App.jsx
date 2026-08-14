@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "./layouts/AppLayout";
 import { ConsultationPage } from "./pages/ConsultationPage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { FinancePage } from "./pages/FinancePage";
 import { InvoiceLookupPage } from "./pages/InvoiceLookupPage";
 import { InvoicePage } from "./pages/InvoicePage";
 import { LoginPage } from "./pages/LoginPage";
@@ -30,6 +31,7 @@ export function App() {
             <Route path="/consultation/:visitId" element={<ConsultationPage />} />
           </Route>
           <Route element={<ProtectedRoute roles={["ADMIN", "STAFF"]} />}>
+            <Route path="/finance" element={<FinancePage />} />
             <Route path="/invoice" element={<InvoiceLookupPage />} />
             <Route path="/invoice/:visitId" element={<InvoicePage />} />
           </Route>

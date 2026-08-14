@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CalendarCheck, ChevronsLeft, ChevronsRight, FileText, Home, LogOut, Menu, Moon, Stethoscope, Sun, Users, X } from "lucide-react";
+import { CalendarCheck, ChevronsLeft, ChevronsRight, FileText, Home, LineChart, LogOut, Menu, Moon, Stethoscope, Sun, Users, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/Button";
@@ -12,6 +12,7 @@ const navItems = [
   { to: "/patients", label: "Pasien", icon: Users },
   { to: "/registration", label: "Registrasi", icon: CalendarCheck },
   { to: "/queue", label: "Antrean", icon: Stethoscope },
+  { to: "/finance", label: "Finance", icon: LineChart },
   { to: "/invoice", label: "Tagihan", icon: FileText }
 ];
 

@@ -41,31 +41,31 @@ export function DashboardPage() {
       label: "Kunjungan",
       value: summary?.todayVisits ?? 0,
       icon: Users,
-      iconClass: "border-primary-200 bg-primary-50 text-primary-700 ring-primary-100 dark:border-[#48d6c9] dark:bg-[#0d3435] dark:text-[#a7eee5] dark:ring-[#48d6c9]"
+      iconClass: "bg-primary-600 text-white shadow-sm shadow-primary-950/10 dark:bg-[#249d8f] dark:text-white"
     },
     {
       label: "Menunggu",
       value: summary?.waiting ?? 0,
       icon: Clock,
-      iconClass: "border-amber-200 bg-amber-50 text-amber-700 ring-amber-100 dark:border-amber-400 dark:bg-amber-500/15 dark:text-amber-200 dark:ring-amber-400/70"
+      iconClass: "bg-primary-600 text-white shadow-sm shadow-primary-950/10 dark:bg-[#249d8f] dark:text-white"
     },
     {
       label: "Konsultasi",
       value: summary?.inConsultation ?? 0,
       icon: Activity,
-      iconClass: "border-sky-200 bg-sky-50 text-sky-700 ring-sky-100 dark:border-sky-400 dark:bg-sky-500/15 dark:text-sky-200 dark:ring-sky-400/70"
+      iconClass: "bg-primary-600 text-white shadow-sm shadow-primary-950/10 dark:bg-[#249d8f] dark:text-white"
     },
     {
       label: "Selesai",
       value: summary?.completed ?? 0,
       icon: CheckCircle2,
-      iconClass: "border-emerald-200 bg-emerald-50 text-emerald-700 ring-emerald-100 dark:border-emerald-400 dark:bg-emerald-500/15 dark:text-emerald-200 dark:ring-emerald-400/70"
+      iconClass: "bg-primary-600 text-white shadow-sm shadow-primary-950/10 dark:bg-[#249d8f] dark:text-white"
     },
     {
       label: "Belum Bayar",
       value: summary?.unpaidInvoices ?? 0,
       icon: FileWarning,
-      iconClass: "border-rose-200 bg-rose-50 text-rose-700 ring-rose-100 dark:border-rose-400 dark:bg-rose-500/15 dark:text-rose-200 dark:ring-rose-400/70"
+      iconClass: "bg-primary-600 text-white shadow-sm shadow-primary-950/10 dark:bg-[#249d8f] dark:text-white"
     }
   ];
   const displayedVisits = visits.slice(0, 5);
@@ -91,7 +91,7 @@ export function DashboardPage() {
                 className="h-full rounded-md border border-primary-100 bg-primary-50/50 shadow-sm shadow-primary-950/5 dark:border-[#4a7378] dark:bg-[#0b2324]"
               >
                 <div className="flex min-h-20 min-w-0 flex-col items-center justify-center gap-1 px-1 py-2 text-center sm:min-h-24 sm:flex-row sm:justify-start sm:gap-3 sm:px-3 sm:py-3 sm:text-left">
-              <div className={`grid size-7 shrink-0 place-items-center rounded-md border ring-1 sm:size-9 ${item.iconClass}`}>
+              <div className={`grid size-7 shrink-0 place-items-center rounded-md sm:size-9 ${item.iconClass}`}>
                 <item.icon className="size-3 sm:size-[17px]" strokeWidth={2.25} />
               </div>
               <div className="min-w-0">
