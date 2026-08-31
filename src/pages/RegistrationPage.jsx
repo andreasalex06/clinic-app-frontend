@@ -38,7 +38,7 @@ export function RegistrationPage() {
         <CardHeader>
           <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
-              <h1 className="break-words text-lg font-semibold text-slate-950">Registrasi Baru</h1>
+              <h1 className="page-title">Registrasi Baru</h1>
               <p className="text-sm text-slate-500">Pilih pasien terdaftar dan masukkan ke antrean hari ini.</p>
             </div>
             <Button className="w-full sm:w-auto" onClick={() => navigate("/patients?redirect=registration")}>

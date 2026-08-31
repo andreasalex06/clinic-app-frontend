@@ -195,10 +195,10 @@ export function InvoicePage() {
   }
 
   return (
-    <PageMotion className="grid gap-5 xl:grid-cols-[minmax(0,320px)_minmax(0,1fr)] xl:gap-6">
+    <PageMotion className="grid items-start gap-5 xl:grid-cols-[minmax(0,280px)_minmax(0,1fr)] xl:gap-6">
       <Card>
         <CardHeader>
-          <h1 className="text-lg font-semibold text-slate-950">Tagihan</h1>
+          <h1 className="page-title">Tagihan</h1>
           <p className="break-words text-sm text-slate-500">
             {invoice.invoiceNo}
           </p>
@@ -225,7 +225,7 @@ export function InvoicePage() {
       <Card>
         <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="font-semibold text-slate-950">Detail Pembayaran</h2>
+            <h2 className="text-base font-medium text-slate-950">Detail Pembayaran</h2>
             <p className="text-sm text-slate-500">
               {invoice.items.length} item tagihan
             </p>
@@ -236,15 +236,15 @@ export function InvoicePage() {
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="hidden overflow-hidden rounded-md border border-primary-100 lg:block">
-            <table className="w-full table-fixed border-separate border-spacing-0 text-left text-sm">
-              <thead className="bg-primary-50/80 text-xs uppercase text-primary-700">
+            <table className="data-table">
+              <thead className="bg-primary-50/80 text-xs text-primary-700">
                 <tr>
-                  <th className="w-[42%] px-4 py-3 font-semibold">Item</th>
-                  <th className="w-[14%] px-4 py-3 text-center font-semibold">
+                  <th className="w-[42%] px-4 py-3 font-medium">Item</th>
+                  <th className="w-[14%] px-4 py-3 text-center font-medium">
                     Jml
                   </th>
-                  <th className="w-[22%] px-4 py-3 font-semibold">Harga</th>
-                  <th className="w-[22%] px-4 py-3 text-right font-semibold">
+                  <th className="w-[22%] px-4 py-3 font-medium">Harga</th>
+                  <th className="w-[22%] px-4 py-3 text-right font-medium">
                     Jumlah
                   </th>
                 </tr>
@@ -261,18 +261,18 @@ export function InvoicePage() {
                         : "bg-slate-50/60 align-middle"
                     }
                   >
-                    <td className="border-t border-slate-100 px-4 py-4 align-middle font-medium text-slate-900">
+                    <td className="border-t border-slate-100 px-4 py-3 align-middle font-medium text-slate-900">
                       <p className="break-words leading-6">{item.item}</p>
                     </td>
-                    <td className="border-t border-slate-100 px-4 py-4 text-center align-middle text-slate-600">
+                    <td className="border-t border-slate-100 px-4 py-3 text-center align-middle text-slate-600">
                       <span className="inline-flex min-w-8 justify-center rounded bg-white px-2 py-1 text-xs font-medium text-slate-700 ring-1 ring-slate-200">
                         {item.quantity}
                       </span>
                     </td>
-                    <td className="border-t border-slate-100 px-4 py-4 align-middle text-slate-600">
+                    <td className="border-t border-slate-100 px-4 py-3 align-middle text-slate-600">
                       {formatRupiah(item.price)}
                     </td>
-                    <td className="border-t border-slate-100 px-4 py-4 text-right align-middle font-semibold text-slate-950">
+                    <td className="border-t border-slate-100 px-4 py-3 text-right align-middle font-semibold text-slate-950">
                       {formatRupiah(item.amount)}
                     </td>
                   </MotionItem>
@@ -289,7 +289,7 @@ export function InvoicePage() {
                 className="rounded-md border border-primary-100 bg-white p-4 shadow-sm shadow-primary-950/5"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <h3 className="min-w-0 break-words text-sm font-semibold text-slate-950">
+                  <h3 className="min-w-0 break-words text-sm font-medium text-slate-950">
                     {item.item}
                   </h3>
                   <span className="shrink-0 rounded bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 ring-1 ring-primary-100">
@@ -324,7 +324,7 @@ export function InvoicePage() {
                   {invoice.invoiceNo}
                 </p>
               </div>
-              <p className="break-words text-xl font-semibold text-primary-700 sm:text-2xl">
+              <p className="break-words text-lg font-semibold leading-7 tabular-nums text-primary-700">
                 {formatRupiah(invoice.total)}
               </p>
             </div>

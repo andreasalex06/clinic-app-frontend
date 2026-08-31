@@ -13,7 +13,7 @@ export function Card({ className, ...props }) {
 }
 
 export function CardHeader({ className, ...props }) {
-  return <div className={cn("min-w-0 border-b border-slate-100 px-4 py-4 dark:border-[#35585e] sm:px-5", className)} {...props} />;
+  return <div className={cn("min-w-0 border-b border-slate-100 p-4 dark:border-[#35585e] sm:px-5 sm:py-5", className)} {...props} />;
 }
 
 export function CardContent({ className, ...props }) {

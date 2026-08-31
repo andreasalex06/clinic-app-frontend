@@ -278,7 +278,7 @@ export function PatientsPage() {
         <Card>
           <CardHeader className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
-              <h2 className="font-semibold text-slate-950">Pasien</h2>
+              <h1 className="page-title">Pasien</h1>
               <p className="text-sm text-slate-500">
                 {patientMeta.total} pasien terdaftar
               </p>
@@ -322,16 +322,16 @@ export function PatientsPage() {
             ) : (
               <>
                 <div className="hidden overflow-hidden rounded-md border border-primary-100 lg:block">
-                  <table className="w-full table-fixed border-separate border-spacing-0 text-left text-sm">
-                    <thead className="bg-primary-50/80 text-xs uppercase text-primary-700">
+                  <table className="data-table">
+                    <thead className="bg-primary-50/80 text-xs text-primary-700">
                       <tr>
-                        <th className="w-[22%] px-4 py-3 font-semibold">
+                        <th className="w-[22%] px-4 py-3 font-medium">
                           Nama
                         </th>
-                        <th className="w-[20%] px-4 py-3 font-semibold">
+                        <th className="w-[20%] px-4 py-3 font-medium">
                           Telepon
                         </th>
-                        <th className="w-[14%] px-4 py-3 font-semibold">
+                        <th className="w-[14%] px-4 py-3 font-medium">
                           Jenis Kelamin
                         </th>
                         <th
@@ -344,7 +344,7 @@ export function PatientsPage() {
                           Alamat
                         </th>
                         {isAdmin && (
-                          <th className="w-[20%] px-4 py-3 text-left font-semibold">
+                          <th className="w-[20%] px-4 py-3 text-left font-medium">
                             Aksi
                           </th>
                         )}
@@ -362,7 +362,7 @@ export function PatientsPage() {
                               : "bg-slate-50/60 align-middle"
                           }
                         >
-                          <td className="border-t border-slate-100 px-4 py-4 align-middle font-medium text-slate-900">
+                          <td className="border-t border-slate-100 px-4 py-3 align-middle font-medium text-slate-900">
                             <button
                               type="button"
                               className="block w-full truncate text-left font-medium text-slate-900 underline-offset-2 hover:text-primary-700 hover:underline dark:text-slate-100 dark:hover:text-primary-100"
@@ -372,19 +372,19 @@ export function PatientsPage() {
                               {patient.name}
                             </button>
                           </td>
-                          <td className="border-t border-slate-100 px-4 py-4 align-middle text-slate-600">
+                          <td className="border-t border-slate-100 px-4 py-3 align-middle text-slate-600">
                             <p className="break-words">{patient.phone}</p>
                           </td>
-                          <td className="border-t border-slate-100 px-4 py-4 align-middle text-slate-600">
+                          <td className="border-t border-slate-100 px-4 py-3 align-middle text-slate-600">
                             {formatGender(patient.gender)}
                           </td>
-                          <td className="border-t border-slate-100 px-4 py-4 align-middle text-slate-600">
+                          <td className="border-t border-slate-100 px-4 py-3 align-middle text-slate-600">
                             <p className="truncate" title={patient.address}>
                               {patient.address}
                             </p>
                           </td>
                           {isAdmin && (
-                            <td className="border-t border-slate-100 px-4 py-4 align-middle">
+                            <td className="border-t border-slate-100 px-4 py-3 align-middle">
                               <div className="grid w-[96px] grid-cols-2 gap-2">
                                 <Button
                                   type="button"
@@ -427,7 +427,7 @@ export function PatientsPage() {
                           className="min-w-0 text-left"
                           onClick={() => openPatientDetail(patient)}
                         >
-                          <h3 className="break-words text-sm font-semibold text-slate-950 underline-offset-2 hover:text-primary-700 hover:underline dark:hover:text-primary-100">
+                          <h3 className="break-words text-sm font-medium text-slate-950 underline-offset-2 hover:text-primary-700 hover:underline dark:hover:text-primary-100">
                             {patient.name}
                           </h3>
                           <p className="mt-1 text-sm text-slate-500">
@@ -766,7 +766,7 @@ export function PatientsPage() {
                   </div>
 
                   <div>
-                    <h3 className="font-semibold text-slate-950">
+                    <h3 className="font-medium text-slate-950">
                       Riwayat Kunjungan
                     </h3>
                     {selectedPatient.visits?.length ? (

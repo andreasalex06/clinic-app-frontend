@@ -116,7 +116,7 @@
 
 body {
   margin: 0;
-  min-width: 320px;
+  min-width: 0;
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -137,11 +137,47 @@ body {
   overflow-x: hidden;
 }
 
-button,
-input,
-select,
-textarea {
-  font: inherit;
+@layer base {
+  body {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    letter-spacing: 0;
+  }
+
+  h1, h2, h3, p {
+    overflow-wrap: anywhere;
+  }
+}
+
+@layer components {
+  .page-title {
+    @apply text-lg font-semibold leading-7 text-slate-950 dark:text-slate-100;
+  }
+
+  .section-title {
+    @apply text-base font-medium leading-6 text-slate-950 dark:text-slate-100;
+  }
+
+  .page-description {
+    @apply mt-1 text-sm font-normal leading-5 text-slate-500 dark:text-slate-400;
+  }
+
+  .page-title + p {
+    @apply mt-1 leading-5;
+  }
+
+  .data-table {
+    @apply w-full table-fixed border-separate border-spacing-0 text-left text-sm leading-5;
+  }
+
+  .data-table th {
+    @apply px-4 py-3 text-xs font-medium normal-case;
+  }
+
+  .data-table td {
+    @apply px-4 py-3;
+    overflow-wrap: anywhere;
+  }
 }
 
 * {

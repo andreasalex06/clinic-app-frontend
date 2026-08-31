@@ -60,7 +60,7 @@ export function LoginPage() {
               <Stethoscope size={23} />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-slate-950">ClinicApp</h1>
+              <h1 className="page-title">ClinicApp</h1>
               <p className="text-sm text-slate-500">Manajemen Rawat Jalan</p>
             </div>
           </div>

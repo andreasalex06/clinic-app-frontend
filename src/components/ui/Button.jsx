@@ -19,7 +19,7 @@ export function Button({ className, variant = "primary", disabled, ...props }) {
       whileTap={!disabled && !shouldReduceMotion ? { scale: 0.98 } : undefined}
       transition={{ duration: 0.16, ease: "easeOut" }}
       className={cn(
-        "inline-flex min-w-0 max-w-full items-center justify-center gap-2 rounded-md px-4 py-2 text-center text-sm font-medium leading-5 transition disabled:pointer-events-none disabled:opacity-50",
+        "inline-flex h-10 min-w-0 max-w-full items-center justify-center gap-2 rounded-md px-3 py-2 text-center text-sm font-medium leading-5 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 disabled:pointer-events-none disabled:opacity-50 [&_svg]:shrink-0",
         variants[variant],
         className
       )}

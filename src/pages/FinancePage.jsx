@@ -118,8 +118,8 @@ export function FinancePage() {
           <div className="relative bg-white dark:bg-[#101a1d]">
             <div className="flex min-w-0 flex-col justify-between gap-3 bg-primary-600 p-4 dark:bg-[#249d8f] sm:flex-row sm:items-center sm:p-5">
               <MotionSection className="min-w-0">
-                <h1 className="break-words text-2xl font-semibold leading-tight text-white">Finance</h1>
-                <p className="mt-1 text-sm font-medium leading-5 text-primary-50/85">Ringkasan pendapatan, tagihan, dan tren pasien</p>
+                <h1 className="break-words text-lg font-semibold leading-7 text-white">Finance</h1>
+                <p className="mt-1 text-sm leading-5 text-primary-50/85">Ringkasan pendapatan, tagihan, dan tren pasien</p>
               </MotionSection>
 
               <div className="grid w-full shrink-0 grid-cols-3 gap-1 rounded-md border border-primary-100 bg-white p-1 shadow-sm shadow-primary-950/10 dark:border-[#4a7378] dark:bg-[#101a1d] sm:w-72">
@@ -135,6 +135,7 @@ export function FinancePage() {
                         : "text-primary-700 hover:bg-primary-50 hover:text-primary-900 dark:text-slate-200 dark:hover:bg-[#0d3435] dark:hover:text-white"
                     )}
                     onClick={() => setPeriod(item.value)}
+                    aria-pressed={period === item.value}
                   >
                     {item.label}
                   </Button>
@@ -143,7 +144,7 @@ export function FinancePage() {
             </div>
 
             <div className="p-4 sm:p-5">
-              <div className="grid min-w-0 grid-cols-1 gap-3 min-[420px]:grid-cols-2 lg:grid-cols-4">
+              <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-4">
                 {cards.map((item, index) => (
                   <MotionItem
                     key={item.label}
@@ -151,12 +152,12 @@ export function FinancePage() {
                     className="h-full rounded-md border border-primary-100 bg-primary-50/60 shadow-sm shadow-primary-950/5 dark:border-[#4a7378] dark:bg-[#0b2324]"
                   >
                     <div className="flex min-h-[5.5rem] min-w-0 items-center gap-3 p-3.5 sm:min-h-24">
-                      <div className={`grid size-10 shrink-0 place-items-center rounded-md sm:size-11 ${item.iconClass}`}>
-                        <item.icon className="size-4 sm:size-5" strokeWidth={2.25} />
+                      <div className={`grid size-9 shrink-0 place-items-center rounded-md ${item.iconClass}`}>
+                        <item.icon className="size-4" />
                       </div>
-                      <div className="min-w-0 overflow-hidden">
-                        <p className="max-w-full whitespace-nowrap text-[clamp(0.75rem,3.2vw,1.15rem)] font-semibold leading-none text-primary-950 dark:text-slate-100" title={String(loading ? "-" : item.value)}>{loading ? "-" : item.value}</p>
-                        <p className="mt-1 text-xs font-medium text-primary-700/75 dark:text-slate-300">{item.label}</p>
+                      <div className="min-w-0">
+                        <p className="break-words text-base font-semibold leading-6 tabular-nums text-primary-950 dark:text-slate-100">{loading ? "-" : item.value}</p>
+                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-300">{item.label}</p>
                       </div>
                     </div>
                   </MotionItem>
@@ -175,7 +176,7 @@ export function FinancePage() {
                     <Banknote className="size-5" />
                   </div>
                   <div className="min-w-0">
-                    <h2 className="font-semibold leading-tight text-slate-950 dark:text-slate-100">Grafik Pendapatan</h2>
+                    <h2 className="text-base font-medium leading-tight text-slate-950 dark:text-slate-100">Grafik Pendapatan</h2>
                     <p className="text-xs font-medium leading-tight text-slate-500 dark:text-slate-300">Periode {activePeriodLabel.toLowerCase()}</p>
                   </div>
                 </div>
@@ -203,7 +204,7 @@ export function FinancePage() {
                     <Activity className="size-5" />
                   </div>
                   <div className="min-w-0">
-                    <h2 className="font-semibold leading-tight text-slate-950 dark:text-slate-100">Grafik Pasien</h2>
+                    <h2 className="text-base font-medium leading-tight text-slate-950 dark:text-slate-100">Grafik Pasien</h2>
                     <p className="text-xs font-medium leading-tight text-slate-500 dark:text-slate-300">Periode {activePeriodLabel.toLowerCase()}</p>
                   </div>
                 </div>
@@ -227,7 +228,7 @@ export function FinancePage() {
         <Card>
           <CardContent>
             <div className="mb-4">
-              <h2 className="font-semibold text-slate-950">Invoice Terbaru</h2>
+              <h2 className="text-base font-medium text-slate-950">Invoice Terbaru</h2>
               <p className="mt-1 text-sm text-slate-500">Delapan tagihan terakhir dari transaksi klinik</p>
             </div>
 
@@ -238,28 +239,28 @@ export function FinancePage() {
             ) : (
               <>
                 <div className="hidden overflow-hidden rounded-md border border-primary-100 md:block">
-                  <table className="w-full table-fixed border-separate border-spacing-0 text-left text-sm">
-                    <thead className="bg-primary-50/80 text-xs uppercase text-primary-700">
+                  <table className="data-table">
+                    <thead className="bg-primary-50/80 text-xs text-primary-700">
                       <tr>
-                        <th className="w-[20%] px-4 py-3 font-semibold">Invoice</th>
-                        <th className="w-[24%] px-4 py-3 font-semibold">Pasien</th>
-                        <th className="w-[22%] px-4 py-3 font-semibold">Dokter</th>
-                        <th className="w-[14%] px-4 py-3 font-semibold">Tanggal</th>
-                        <th className="w-[12%] px-4 py-3 font-semibold">Status</th>
-                        <th className="w-[16%] px-4 py-3 text-right font-semibold">Total</th>
+                        <th className="w-[20%] px-4 py-3 font-medium">Invoice</th>
+                        <th className="w-[24%] px-4 py-3 font-medium">Pasien</th>
+                        <th className="w-[22%] px-4 py-3 font-medium">Dokter</th>
+                        <th className="w-[14%] px-4 py-3 font-medium">Tanggal</th>
+                        <th className="w-[12%] px-4 py-3 font-medium">Status</th>
+                        <th className="w-[16%] px-4 py-3 text-right font-medium">Total</th>
                       </tr>
                     </thead>
                     <tbody>
                       {recentInvoices.map((invoice, index) => (
                         <MotionItem key={invoice.id} as="tr" index={index} className={index % 2 === 0 ? "bg-white align-middle" : "bg-slate-50/60 align-middle"}>
-                          <td className="border-t border-slate-100 px-4 py-4 align-middle font-medium text-slate-900">{invoice.invoiceNo}</td>
-                          <td className="border-t border-slate-100 px-4 py-4 align-middle text-slate-600"><p className="break-words">{invoice.visit.patient.name}</p></td>
-                          <td className="border-t border-slate-100 px-4 py-4 align-middle text-slate-600"><p className="break-words">{invoice.visit.doctor.name}</p></td>
-                          <td className="border-t border-slate-100 px-4 py-4 align-middle text-slate-600">{formatDate(invoice.createdAt)}</td>
-                          <td className="border-t border-slate-100 px-4 py-4 align-middle">
+                          <td className="border-t border-slate-100 px-4 py-3 align-middle font-medium text-slate-900">{invoice.invoiceNo}</td>
+                          <td className="border-t border-slate-100 px-4 py-3 align-middle text-slate-600"><p className="break-words">{invoice.visit.patient.name}</p></td>
+                          <td className="border-t border-slate-100 px-4 py-3 align-middle text-slate-600"><p className="break-words">{invoice.visit.doctor.name}</p></td>
+                          <td className="border-t border-slate-100 px-4 py-3 align-middle text-slate-600">{formatDate(invoice.createdAt)}</td>
+                          <td className="border-t border-slate-100 px-4 py-3 align-middle">
                             <Badge tone={invoice.status === "PAID" ? "green" : "amber"}>{formatInvoiceStatus(invoice.status)}</Badge>
                           </td>
-                          <td className="border-t border-slate-100 px-4 py-4 text-right align-middle font-semibold text-slate-900">{formatRupiah(invoice.total)}</td>
+                          <td className="border-t border-slate-100 px-4 py-3 text-right align-middle font-semibold text-slate-900">{formatRupiah(invoice.total)}</td>
                         </MotionItem>
                       ))}
                     </tbody>
@@ -271,7 +272,7 @@ export function FinancePage() {
                     <MotionItem key={invoice.id} index={index} className="min-w-0 rounded-md border border-primary-100 bg-white p-4 dark:border-[#4a7378] dark:bg-[#0b2324]">
                       <div className="flex min-w-0 items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <h3 className="break-words text-sm font-semibold text-slate-950">{invoice.invoiceNo}</h3>
+                          <h3 className="break-words text-sm font-medium text-slate-950">{invoice.invoiceNo}</h3>
                           <p className="mt-1 break-words text-sm text-slate-500">{invoice.visit.patient.name}</p>
                         </div>
                         <Badge className="shrink-0" tone={invoice.status === "PAID" ? "green" : "amber"}>{formatInvoiceStatus(invoice.status)}</Badge>

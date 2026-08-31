@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { AlertCircle } from "lucide-react";
 import { api } from "../api/client";
 import { Button } from "../components/ui/Button";
 import { Card, CardContent, CardHeader } from "../components/ui/Card";
@@ -18,6 +19,47 @@ function formatVisitStatus(status) {
   return labels[status] ?? status;
 }
 
+function getConsultationFormErrors(form, selectedMedicines) {
+  const errors = {};
+
+  if (form.complaint.trim().length < 10) {
+    errors.complaint = "Keluhan minimal 10 karakter agar catatan pemeriksaan cukup jelas.";
+  }
+
+  if (!form.diagnosisId) {
+    errors.diagnosisId = "Diagnosis wajib dipilih.";
+  }
+
+  if (form.treatmentIds.length === 0) {
+    errors.treatmentIds = "Pilih minimal satu tindakan atau biaya konsultasi.";
+  }
+
+  if (form.notes.trim().length < 10) {
+    errors.notes = "Catatan minimal 10 karakter untuk dokumentasi konsultasi.";
+  }
+
+  const invalidMedicine = selectedMedicines.find((item) => !item.medicineId || item.quantity < 1);
+
+  if (invalidMedicine) {
+    errors.medicines = "Obat yang ditambahkan wajib dipilih dan jumlahnya minimal 1.";
+  }
+
+  return errors;
+}
+
+function FieldWarning({ children }) {
+  if (!children) {
+    return null;
+  }
+
+  return (
+    <p className="mt-2 flex items-start gap-2 text-xs leading-5 text-amber-700">
+      <AlertCircle className="mt-0.5 size-3.5 shrink-0" />
+      <span>{children}</span>
+    </p>
+  );
+}
+
 export function ConsultationPage() {
   const { visitId } = useParams();
   const navigate = useNavigate();
@@ -32,6 +74,8 @@ export function ConsultationPage() {
     notes: ""
   });
   const [selectedMedicines, setSelectedMedicines] = useState([]);
+  const formErrors = getConsultationFormErrors(form, selectedMedicines);
+  const isFormValid = Object.keys(formErrors).length === 0;
 
   useEffect(() => {
     async function loadData() {
@@ -66,13 +110,17 @@ export function ConsultationPage() {
   async function handleSubmit(event) {
     event.preventDefault();
 
+    if (!isFormValid) {
+      return;
+    }
+
     await api.post("/consultations", {
       visitId,
       ...form,
       medicines: selectedMedicines
     });
 
-    navigate(`/invoice/${visitId}`);
+    navigate("/queue");
   }
 
   function toggleTreatment(treatmentId) {
@@ -89,10 +137,10 @@ export function ConsultationPage() {
   }
 
   return (
-    <PageMotion className="grid items-start gap-5 xl:grid-cols-[minmax(0,320px)_minmax(0,1fr)] xl:gap-6">
+    <PageMotion className="grid items-start gap-5 xl:grid-cols-[minmax(0,280px)_minmax(0,1fr)] xl:gap-6">
       <Card className="self-start">
         <CardHeader>
-          <h1 className="break-words text-lg font-semibold text-slate-950">{visit?.patient.name ?? "Konsultasi"}</h1>
+          <h1 className="page-title">{visit?.patient.name ?? "Konsultasi"}</h1>
           <p className="break-words text-sm text-slate-500">{visit?.visitNumber}</p>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
@@ -105,20 +153,51 @@ export function ConsultationPage() {
 
       <Card>
         <CardHeader>
-          <h2 className="font-semibold text-slate-950">Form Konsultasi</h2>
+          <h2 className="text-base font-medium text-slate-950">Form Konsultasi</h2>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
-            <Textarea placeholder="Keluhan" value={form.complaint} onChange={(event) => setForm({ ...form, complaint: event.target.value })} />
-            <Select value={form.diagnosisId} onChange={(event) => setForm({ ...form, diagnosisId: event.target.value })}>
-              {diagnoses.map((diagnosis) => (
-                <option key={diagnosis.id} value={diagnosis.id}>
-                  {diagnosis.name} ({diagnosis.code})
-                </option>
-              ))}
-            </Select>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-slate-950" htmlFor="complaint">
+                Keluhan
+              </label>
+              <Textarea
+                id="complaint"
+                placeholder="Tulis keluhan utama pasien..."
+                value={form.complaint}
+                onChange={(event) => setForm({ ...form, complaint: event.target.value })}
+              />
+              <div className="mt-1 flex justify-between gap-3 text-xs text-slate-500">
+                <span>Minimal 10 karakter.</span>
+                <span>{form.complaint.trim().length}/10</span>
+              </div>
+              <FieldWarning>{formErrors.complaint}</FieldWarning>
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-slate-950" htmlFor="diagnosisId">
+                Diagnosis
+              </label>
+              <Select
+                id="diagnosisId"
+                value={form.diagnosisId}
+                onChange={(event) => setForm({ ...form, diagnosisId: event.target.value })}
+              >
+                {diagnoses.map((diagnosis) => (
+                  <option key={diagnosis.id} value={diagnosis.id}>
+                    {diagnosis.name} ({diagnosis.code})
+                  </option>
+                ))}
+              </Select>
+              <FieldWarning>{formErrors.diagnosisId}</FieldWarning>
+            </div>
+
             <MotionSection className="min-w-0 space-y-3 rounded-md border border-primary-100 p-3 sm:p-4">
-              <h3 className="text-sm font-semibold text-slate-950">Biaya & Tindakan</h3>
+              <div>
+                <h3 className="text-sm font-medium text-slate-950">Biaya & Tindakan</h3>
+                <p className="mt-1 text-xs leading-5 text-slate-500">Pilih tindakan yang diberikan pada sesi konsultasi.</p>
+                <FieldWarning>{formErrors.treatmentIds}</FieldWarning>
+              </div>
               <div className="grid gap-2 sm:grid-cols-2">
                 {treatments.map((treatment) => {
                   const isSelected = form.treatmentIds.includes(treatment.id);
@@ -154,7 +233,11 @@ export function ConsultationPage() {
 
             <MotionSection className="min-w-0 space-y-3 rounded-md border border-primary-100 p-3 sm:p-4">
               <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h3 className="text-sm font-semibold text-slate-950">Obat</h3>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-950">Obat</h3>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">Tambahkan obat hanya jika pasien mendapat resep.</p>
+                  <FieldWarning>{formErrors.medicines}</FieldWarning>
+                </div>
                 <Button className="w-full sm:w-auto" type="button" variant="outline" onClick={addMedicine}>Tambah Obat</Button>
               </div>
               {selectedMedicines.map((item, index) => (
@@ -188,8 +271,24 @@ export function ConsultationPage() {
               ))}
             </MotionSection>
 
-            <Textarea placeholder="Catatan" value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} />
-            <Button className="w-full sm:w-auto" disabled={!form.complaint || !form.diagnosisId || form.treatmentIds.length === 0}>Selesaikan Konsultasi</Button>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-slate-950" htmlFor="notes">
+                Catatan
+              </label>
+              <Textarea
+                id="notes"
+                placeholder="Tulis catatan pemeriksaan, instruksi, atau observasi..."
+                value={form.notes}
+                onChange={(event) => setForm({ ...form, notes: event.target.value })}
+              />
+              <div className="mt-1 flex justify-between gap-3 text-xs text-slate-500">
+                <span>Minimal 10 karakter.</span>
+                <span>{form.notes.trim().length}/10</span>
+              </div>
+              <FieldWarning>{formErrors.notes}</FieldWarning>
+            </div>
+
+            <Button className="w-full sm:w-auto" disabled={!isFormValid}>Selesaikan Konsultasi</Button>
           </form>
         </CardContent>
       </Card>

@@ -7,6 +7,8 @@ import { InvoiceLookupPage } from "./pages/InvoiceLookupPage";
 import { InvoicePage } from "./pages/InvoicePage";
 import { LoginPage } from "./pages/LoginPage";
 import { PatientsPage } from "./pages/PatientsPage";
+import { PharmacyPage } from "./pages/PharmacyPage";
+import { QrPage } from "./pages/QrPage";
 import { QueuePage } from "./pages/QueuePage";
 import { RegistrationPage } from "./pages/RegistrationPage";
 import { UnauthorizedPage } from "./pages/UnauthorizedPage";
@@ -27,6 +29,9 @@ export function App() {
             <Route path="/registration" element={<RegistrationPage />} />
           </Route>
           <Route path="/queue" element={<QueuePage />} />
+          <Route element={<ProtectedRoute roles={["ADMIN", "STAFF"]} />}>
+            <Route path="/qr" element={<QrPage />} />
+          </Route>
           <Route element={<ProtectedRoute roles={["ADMIN", "DOCTOR"]} />}>
             <Route path="/consultation/:visitId" element={<ConsultationPage />} />
           </Route>
@@ -34,6 +39,7 @@ export function App() {
             <Route path="/finance" element={<FinancePage />} />
             <Route path="/invoice" element={<InvoiceLookupPage />} />
             <Route path="/invoice/:visitId" element={<InvoicePage />} />
+            <Route path="/pharmacy" element={<PharmacyPage />} />
           </Route>
         </Route>
       </Route>

@@ -11,7 +11,7 @@ export function Badge({ className, tone = "primary", ...props }) {
 
   return (
     <span
-      className={cn("inline-flex items-center rounded px-2 py-1 text-xs font-medium ring-1", tones[tone], className)}
+      className={cn("inline-flex min-h-6 max-w-full items-center rounded px-2 py-1 text-xs font-medium leading-4 ring-1", tones[tone], className)}
       {...props}
     />
   );

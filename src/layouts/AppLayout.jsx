@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CalendarCheck, ChevronsLeft, ChevronsRight, FileText, Home, LineChart, LogOut, Menu, Moon, Stethoscope, Sun, Users, X } from "lucide-react";
+import { CalendarCheck, ChevronsLeft, ChevronsRight, FileText, Home, LineChart, LogOut, Menu, Moon, Pill, QrCode, Stethoscope, Sun, Users, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/Button";
@@ -11,7 +11,9 @@ const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: Home },
   { to: "/patients", label: "Pasien", icon: Users },
   { to: "/registration", label: "Registrasi", icon: CalendarCheck },
+  { to: "/qr", label: "QR Pasien", icon: QrCode },
   { to: "/queue", label: "Antrean", icon: Stethoscope },
+  { to: "/pharmacy", label: "Farmasi", icon: Pill },
   { to: "/finance", label: "Finance", icon: LineChart },
   { to: "/invoice", label: "Tagihan", icon: FileText }
 ];
@@ -51,11 +53,11 @@ export function AppLayout() {
         animate={shouldReduceMotion ? undefined : { width: isSidebarCollapsed ? 80 : 256 }}
         transition={{ duration: 0.2, ease: "easeOut" }}
         className={cn(
-          "fixed inset-y-0 left-0 hidden overflow-hidden border-r border-primary-700 bg-primary-700 dark:border-[#35585e] dark:bg-[#0b2324] lg:block",
+          "fixed inset-y-0 left-0 z-20 hidden flex-col overflow-hidden border-r border-primary-700 bg-primary-700 dark:border-[#35585e] dark:bg-[#0b2324] lg:flex",
           isSidebarCollapsed ? "w-20" : "w-64"
         )}
       >
-        <div className={cn("flex h-16 items-center border-b border-white/15 dark:border-[#4a7378]", isSidebarCollapsed ? "justify-center px-3" : "gap-3 px-4")}>
+        <div className={cn("flex h-16 shrink-0 items-center border-b border-white/15 dark:border-[#4a7378]", isSidebarCollapsed ? "justify-center px-3" : "gap-2 px-3")}>
           <Button
             type="button"
             variant="ghost"
@@ -72,7 +74,7 @@ export function AppLayout() {
           <AnimatePresence initial={false}>
             {!isSidebarCollapsed && (
             <motion.div
-              className="flex min-w-0 items-center gap-3"
+              className="flex min-w-0 items-center gap-2"
               initial={shouldReduceMotion ? false : { opacity: 0, x: -8 }}
               animate={shouldReduceMotion ? undefined : { opacity: 1, x: 0 }}
               exit={shouldReduceMotion ? undefined : { opacity: 0, x: -8 }}
@@ -89,7 +91,7 @@ export function AppLayout() {
             )}
           </AnimatePresence>
         </div>
-        <nav className={cn("space-y-1 p-4 pb-60", isSidebarCollapsed && "px-3")}>
+        <nav aria-label="Navigasi utama" className={cn("min-h-0 flex-1 space-y-1 overflow-y-auto p-3", isSidebarCollapsed && "px-3")}>
           {navItems.map((item) => (
             <NavLink
               key={item.to}
@@ -97,7 +99,7 @@ export function AppLayout() {
               title={isSidebarCollapsed ? item.label : undefined}
               className={({ isActive }) =>
                 cn(
-                  "flex h-10 items-center rounded-md text-sm font-medium",
+                  "flex h-11 items-center rounded-md text-sm font-medium leading-5",
                   isSidebarCollapsed ? "justify-center px-0" : "gap-3 px-3",
                   isActive
                     ? "bg-white text-primary-800 shadow-sm shadow-primary-950/10 dark:!bg-white dark:!text-[#071113]"
@@ -123,22 +125,11 @@ export function AppLayout() {
         </nav>
         <div
           className={cn(
-            "absolute bottom-0 left-0 right-0 pb-4 pt-11 shadow-2xl shadow-primary-950/15 ring-1 ring-inset ring-primary-100 dark:shadow-black/50 dark:ring-[#48d6c9]",
+            "shrink-0 border-t border-primary-100 py-4 dark:border-[#35585e]",
             isSidebarCollapsed ? "px-3" : "px-4"
           )}
           style={{ backgroundColor: sidebarPanelColor }}
         >
-          <svg
-            className="absolute -top-9 -left-16 h-12 w-96"
-            viewBox="0 0 256 40"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
-            <path
-              fill={sidebarPanelColor}
-              d="M0 23C34 14 58 14 86 22C118 31 144 31 176 21C207 11 231 12 256 20V40H0V23Z"
-            />
-          </svg>
           <div className="relative space-y-3">
           <div className={cn(isSidebarCollapsed && "grid place-items-center")}>
             {isSidebarCollapsed ? (
@@ -147,7 +138,7 @@ export function AppLayout() {
               </div>
             ) : (
               <>
-                <p className="text-sm font-semibold text-slate-900 dark:!text-[#071113]">{user?.name}</p>
+                <p className="truncate text-sm font-medium text-slate-900 dark:!text-[#071113]" title={user?.name}>{user?.name}</p>
                 <p className="text-xs font-medium text-slate-500 dark:!text-[#145b5a]">{user?.role}</p>
               </>
             )}
@@ -215,7 +206,7 @@ export function AppLayout() {
             {isMobileMenuOpen && (
               <motion.div
                 key="mobile-menu-panel"
-                className="absolute left-3 right-3 top-[calc(100%+8px)] z-20 rounded-lg border border-primary-100 bg-white p-2 shadow-lg shadow-primary-950/10 dark:border-[#35585e] dark:bg-[#101a1d] dark:shadow-black/40 sm:left-4 sm:right-4"
+                className="absolute left-3 right-3 top-[calc(100%+8px)] z-20 max-h-[calc(100dvh-5rem)] overflow-y-auto rounded-lg border border-primary-100 bg-white p-2 shadow-lg shadow-primary-950/10 dark:border-[#35585e] dark:bg-[#101a1d] dark:shadow-black/40 sm:left-4 sm:right-4"
                 initial={shouldReduceMotion ? false : { opacity: 0, y: -10, scale: 0.98 }}
                 animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
                 exit={shouldReduceMotion ? undefined : { opacity: 0, y: -8, scale: 0.98 }}
@@ -241,7 +232,7 @@ export function AppLayout() {
                     </NavLink>
                   ))}
                 </nav>
-                <div className="mt-2 border-t border-slate-100 pt-2 dark:border-[#35585e]">
+                <div className="mt-2 space-y-2 border-t border-slate-100 pt-2 dark:border-[#35585e]">
                   <Button variant="outline" className={cn("h-11 w-full px-3", themeToggleButtonClass)} onClick={toggleTheme}>
                     {isDarkMode ? <Sun size={17} /> : <Moon size={17} />}
                     {isDarkMode ? "Mode terang" : "Mode gelap"}
@@ -255,7 +246,7 @@ export function AppLayout() {
             )}
           </AnimatePresence>
         </div>
-        <div className="mx-auto min-w-0 max-w-7xl px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
+        <div className="mx-auto min-w-0 w-full max-w-[1440px] px-3 py-4 sm:p-5 lg:p-6">
           <Outlet />
         </div>
       </main>

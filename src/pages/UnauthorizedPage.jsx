@@ -26,7 +26,7 @@ export function UnauthorizedPage() {
       <MotionSection className="max-w-md">
       <Card>
         <CardContent className="space-y-4 text-center">
-          <h1 className="text-xl font-semibold text-slate-950">Akses Ditolak</h1>
+          <h1 className="page-title">Akses Ditolak</h1>
           <p className="text-sm text-slate-500">Peran akun ini tidak punya akses ke halaman tersebut.</p>
           <Link to="/dashboard">
             <Button>Kembali ke dashboard</Button>

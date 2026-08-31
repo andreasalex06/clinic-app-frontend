@@ -5,6 +5,7 @@ import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
 import { Card, CardContent, CardHeader } from "../components/ui/Card";
 import { MotionItem, PageMotion } from "../components/ui/Motion";
+import { formatQueueCode } from "../lib/queue";
 import { useAuthStore } from "../stores/authStore";
 
 const QUEUE_PAGE_SIZE = 10;
@@ -206,8 +207,8 @@ export function QueuePage() {
     <Card>
       <CardHeader className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-lg font-semibold text-slate-950">Antrean</h1>
-          <p className="text-sm text-slate-500">{visitMeta.total} kunjungan hari ini</p>
+          <h1 className="page-title">Antrean</h1>
+          <p className="page-description">{visitMeta.total} kunjungan hari ini</p>
         </div>
       </CardHeader>
       <CardContent>
@@ -225,31 +226,33 @@ export function QueuePage() {
           </div>
         ) : (
           <>
-        <div className="hidden overflow-hidden rounded-md border border-primary-100 lg:block">
-          <table className="w-full table-fixed border-separate border-spacing-0 text-left text-sm">
-            <thead className="bg-primary-50/80 text-xs uppercase text-primary-700">
+        <div className="hidden overflow-x-auto rounded-md border border-primary-100 xl:block">
+          <table className="data-table min-w-[880px]">
+            <thead className="bg-primary-50/80 text-xs text-primary-700">
               <tr>
-                <th className="w-[23%] px-4 py-3 font-semibold">Pasien</th>
-                <th className="w-[19%] px-4 py-3 font-semibold">Kunjungan</th>
-                <th className="w-[10%] px-4 py-3 font-semibold">Waktu</th>
-                <th className="w-[21%] px-4 py-3 font-semibold">Dokter</th>
-                <th className="w-[11%] px-4 py-3 font-semibold">Status</th>
-                <th className="w-[16%] px-4 py-3 text-left font-semibold">Aksi</th>
+                <th className="w-[9%] px-4 py-3 font-medium">No.</th>
+                <th className="w-[19%] px-4 py-3 font-medium">Pasien</th>
+                <th className="w-[15%] px-4 py-3 font-medium">Kunjungan</th>
+                <th className="w-[9%] px-4 py-3 font-medium">Waktu</th>
+                <th className="w-[17%] px-4 py-3 font-medium">Dokter</th>
+                <th className="w-[14%] px-4 py-3 font-medium">Status</th>
+                <th className="w-[17%] px-4 py-3 text-left font-medium">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {visits.map((visit, index) => (
                 <MotionItem key={visit.id} as="tr" index={index} className={index % 2 === 0 ? "bg-white align-middle" : "bg-slate-50/60 align-middle"}>
-                  <td className="border-t border-slate-100 px-4 py-4 align-middle font-medium text-slate-900"><p className="break-words">{visit.patient.name}</p></td>
-                  <td className="border-t border-slate-100 px-4 py-4 align-middle text-slate-600"><p className="break-words">{visit.visitNumber}</p></td>
-                  <td className="border-t border-slate-100 px-4 py-4 align-middle text-slate-600">{new Date(visit.checkInTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</td>
-                  <td className="border-t border-slate-100 px-4 py-4 align-middle text-slate-600"><p className="break-words">{visit.doctor.name}</p></td>
-                  <td className="border-t border-slate-100 px-4 py-4 align-middle">
+                  <td className="whitespace-nowrap border-t border-slate-100 px-4 py-3 align-middle font-semibold tabular-nums text-primary-700">{formatQueueCode(visit.queueNumber)}</td>
+                  <td className="border-t border-slate-100 px-4 py-3 align-middle font-medium text-slate-900"><p className="break-words">{visit.patient.name}</p></td>
+                  <td className="border-t border-slate-100 px-4 py-3 align-middle text-slate-600"><p className="break-words">{visit.visitNumber}</p></td>
+                  <td className="border-t border-slate-100 px-4 py-3 align-middle text-slate-600">{new Date(visit.checkInTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</td>
+                  <td className="border-t border-slate-100 px-4 py-3 align-middle text-slate-600"><p className="break-words">{visit.doctor.name}</p></td>
+                  <td className="border-t border-slate-100 px-4 py-3 align-middle">
                     <Badge tone={getVisitStatusTone(visit.status)}>
                       {formatVisitStatus(visit.status)}
                     </Badge>
                   </td>
-                  <td className="border-t border-slate-100 px-4 py-4 align-middle">
+                  <td className="border-t border-slate-100 px-4 py-3 align-middle">
                     <div className="flex w-36 max-w-full items-center justify-start">
                       {renderVisitActions(visit)}
                     </div>
@@ -259,23 +262,26 @@ export function QueuePage() {
             </tbody>
           </table>
         </div>
-        <div className="grid gap-3 lg:hidden">
+        <div className="grid gap-3 md:grid-cols-2 xl:hidden">
           {visits.map((visit, index) => (
             <MotionItem key={visit.id} index={index} className="min-w-0 rounded-md border border-primary-100 bg-white p-4">
-              <div className="flex min-w-0 items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h3 className="break-words text-sm font-semibold text-slate-950">{visit.patient.name}</h3>
-                  <p className="mt-1 break-words text-xs text-slate-400">{visit.visitNumber}</p>
-                </div>
-                <Badge className="shrink-0" tone={getVisitStatusTone(visit.status)}>
-                  {formatVisitStatus(visit.status)}
-                </Badge>
+              <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-start gap-3">
+                  <div className="grid h-10 min-w-16 shrink-0 place-items-center whitespace-nowrap rounded-md bg-primary-50 px-2 text-sm font-medium tabular-nums text-primary-700">
+                    {formatQueueCode(visit.queueNumber)}
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="break-words text-sm font-medium text-slate-950">{visit.patient.name}</h3>
+                    <p className="mt-1 break-words text-xs text-slate-400">{visit.visitNumber}</p>
+                  </div>
               </div>
               <div className="mt-3 grid gap-2 text-sm text-slate-600">
                 <p className="break-words"><span className="font-medium text-slate-900">Dokter:</span> {visit.doctor.name}</p>
-                <p><span className="font-medium text-slate-900">Waktu:</span> {new Date(visit.checkInTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs tabular-nums text-slate-500">{new Date(visit.checkInTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                  <Badge tone={getVisitStatusTone(visit.status)}>{formatVisitStatus(visit.status)}</Badge>
+                </div>
               </div>
-              <div className="mt-4 grid gap-2">
+              <div className={`mt-4 grid gap-2 border-t border-slate-100 pt-3 ${canCancelVisit && visit.status === "WAITING" ? "min-[380px]:grid-cols-2" : ""}`}>
                 {renderVisitActions(visit, true)}
               </div>
             </MotionItem>
