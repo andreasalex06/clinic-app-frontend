@@ -50,31 +50,32 @@ export function DashboardPage() {
       label: "Kunjungan",
       value: summary?.todayVisits ?? 0,
       icon: Users,
-      iconClass: "bg-primary-600 text-white shadow-sm shadow-primary-950/10 dark:bg-[#249d8f] dark:text-white"
+      iconClass: "text-teal-600 dark:text-teal-300",
+      isPrimary: true
     },
     {
       label: "Menunggu",
       value: summary?.waiting ?? 0,
       icon: Clock,
-      iconClass: "bg-primary-600 text-white shadow-sm shadow-primary-950/10 dark:bg-[#249d8f] dark:text-white"
+      iconClass: "text-amber-600 dark:text-amber-300"
     },
     {
       label: "Konsultasi",
       value: summary?.inConsultation ?? 0,
       icon: Activity,
-      iconClass: "bg-primary-600 text-white shadow-sm shadow-primary-950/10 dark:bg-[#249d8f] dark:text-white"
+      iconClass: "text-sky-600 dark:text-sky-300"
     },
     {
       label: "Selesai",
       value: summary?.completed ?? 0,
       icon: CheckCircle2,
-      iconClass: "bg-primary-600 text-white shadow-sm shadow-primary-950/10 dark:bg-[#249d8f] dark:text-white"
+      iconClass: "text-emerald-600 dark:text-emerald-300"
     },
     {
       label: "Belum Bayar",
       value: summary?.unpaidInvoices ?? 0,
       icon: FileWarning,
-      iconClass: "bg-primary-600 text-white shadow-sm shadow-primary-950/10 dark:bg-[#249d8f] dark:text-white"
+      iconClass: "text-rose-600 dark:text-rose-300"
     }
   ];
   const displayedVisits = visits.slice(0, 5);
@@ -102,39 +103,39 @@ export function DashboardPage() {
 
   return (
     <PageMotion>
-      <div className="space-y-6 bg-white p-4 dark:bg-[#101a1d] sm:p-5">
-          <MotionSection className="flex min-w-0 flex-col justify-between gap-3 sm:flex-row sm:items-center">
+      <div className="min-w-0 space-y-7 bg-white px-4 py-5 dark:bg-[#101a1d] sm:px-5 sm:py-6 lg:px-6 lg:py-7">
+          <MotionSection className="flex min-w-0 flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div className="min-w-0">
-              <h1 className="page-title">Dashboard</h1>
-              <p className="page-description">Ringkasan rawat jalan hari ini</p>
+              <h1 className="text-xl font-semibold leading-8 text-slate-950 dark:text-slate-100 sm:text-2xl">Dashboard</h1>
+              <p className="mt-1 text-sm leading-5 text-slate-500 dark:text-slate-400">Ringkasan operasional rawat jalan hari ini</p>
             </div>
             <Button className="w-full sm:w-auto" onClick={() => navigate("/registration")}><Plus className="size-4" />Registrasi Baru</Button>
           </MotionSection>
 
-          <div className="grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+          <div className="grid min-w-0 grid-cols-2 gap-3 lg:grid-cols-5">
             {cards.map((item, index) => (
               <MotionItem
                 key={item.label}
                 index={index}
-                className="h-full rounded-md border border-primary-100 bg-primary-50/50 shadow-sm shadow-primary-950/5 dark:border-[#4a7378] dark:bg-[#0b2324]"
+                className={`h-full rounded-md border border-slate-200 bg-white shadow-sm shadow-slate-950/5 dark:border-[#35585e] dark:bg-[#0b2324] ${item.isPrimary ? "col-span-2 lg:col-span-1" : ""}`}
               >
-                <div className="flex min-h-24 min-w-0 items-center gap-3 p-3">
-              <div className={`grid size-8 shrink-0 place-items-center rounded-md ${item.iconClass}`}>
-                <item.icon className="size-4" />
-              </div>
-              <div className="min-w-0">
-                <p className="tabular-nums text-lg font-semibold leading-7 text-slate-950">{item.value}</p>
-                <p className="mt-0.5 text-xs leading-4 text-slate-500">{item.label}</p>
-              </div>
+                <div className="flex min-h-20 min-w-0 items-center px-3 py-3 min-[360px]:px-4">
+                  <div className="min-w-0 w-full">
+                    <div className="flex min-w-0 items-center justify-between gap-3">
+                      <p className="tabular-nums text-2xl font-semibold leading-none text-slate-950 dark:text-slate-100">{item.value}</p>
+                      <item.icon className={`size-5 shrink-0 ${item.iconClass}`} strokeWidth={2} />
+                    </div>
+                    <p className="mt-1.5 text-xs font-medium leading-4 text-slate-500 dark:text-slate-400">{item.label}</p>
+                  </div>
                 </div>
               </MotionItem>
             ))}
           </div>
 
-          <section className="border-t border-slate-100 pt-5 dark:border-[#35585e] sm:pt-6">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <section className="border-t border-slate-200 pt-6 dark:border-[#35585e] sm:pt-7">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-base section-title">Antrean Hari Ini</h2>
+            <h2 className="text-lg font-semibold leading-7 text-slate-950 dark:text-slate-100">Antrean Hari Ini</h2>
             {hiddenVisitsCount > 0 && (
               <p className="mt-1 text-sm text-slate-500">
                 Menampilkan 5 dari {visits.length} antrean.
@@ -212,10 +213,10 @@ export function DashboardPage() {
             </div>
           </section>
 
-          <section className="border-t border-slate-100 pt-5 dark:border-[#35585e] sm:pt-6">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <section className="border-t border-slate-200 pt-6 dark:border-[#35585e] sm:pt-7">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="text-base section-title">Status Dokter</h2>
+                <h2 className="text-lg font-semibold leading-7 text-slate-950 dark:text-slate-100">Status Dokter</h2>
                 <p className="mt-1 text-sm text-slate-500">
                   {activeDoctors.length} aktif, {inactiveDoctors.length} nonaktif
                 </p>
