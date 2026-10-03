@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Trash2 } from "lucide-react";
 import { api } from "../api/client";
 import { Button } from "../components/ui/Button";
 import { Card, CardContent, CardHeader } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
 import { MotionItem, MotionSection, PageMotion } from "../components/ui/Motion";
-import { Select } from "../components/ui/Select";
+import { SearchableSelect } from "../components/ui/SearchableSelect";
 import { Textarea } from "../components/ui/Textarea";
 
 function formatVisitStatus(status) {
@@ -42,6 +42,14 @@ function getConsultationFormErrors(form, selectedMedicines) {
 
   if (invalidMedicine) {
     errors.medicines = "Obat yang ditambahkan wajib dipilih dan jumlahnya minimal 1.";
+  }
+
+  const medicineWithoutInstructions = selectedMedicines.find(
+    (item) => item.instructions.trim().length < 3
+  );
+
+  if (medicineWithoutInstructions) {
+    errors.medicines = "Catatan aturan pakai setiap obat minimal 3 karakter.";
   }
 
   return errors;
@@ -91,20 +99,22 @@ export function ConsultationPage() {
       setDiagnoses(diagnosesResponse.data.data);
       setTreatments(treatmentsResponse.data.data);
       setMedicines(medicinesResponse.data.data);
-      setForm((current) => ({
-        ...current,
-        diagnosisId: diagnosesResponse.data.data[0]?.id ?? "",
-        treatmentIds: treatmentsResponse.data.data[0]?.id ? [treatmentsResponse.data.data[0].id] : []
-      }));
+
     }
 
     void loadData();
   }, [visitId]);
 
   function addMedicine() {
-    const medicineId = medicines[0]?.id;
-    if (!medicineId) return;
-    setSelectedMedicines([...selectedMedicines, { medicineId, quantity: 1 }]);
+    if (!medicines.length) return;
+    setSelectedMedicines([
+      ...selectedMedicines,
+      { rowId: crypto.randomUUID(), medicineId: "", quantity: 1, instructions: "" }
+    ]);
+  }
+
+  function removeMedicine(indexToRemove) {
+    setSelectedMedicines((current) => current.filter((_, index) => index !== indexToRemove));
   }
 
   async function handleSubmit(event) {
@@ -117,10 +127,10 @@ export function ConsultationPage() {
     await api.post("/consultations", {
       visitId,
       ...form,
-      medicines: selectedMedicines
+      medicines: selectedMedicines.map(({ medicineId, quantity, instructions }) => ({ medicineId, quantity, instructions }))
     });
 
-    navigate("/queue");
+    navigate("/dashboard");
   }
 
   function toggleTreatment(treatmentId) {
@@ -178,17 +188,19 @@ export function ConsultationPage() {
               <label className="mb-1.5 block text-sm font-medium text-slate-950" htmlFor="diagnosisId">
                 Diagnosis
               </label>
-              <Select
+              <SearchableSelect
                 id="diagnosisId"
                 value={form.diagnosisId}
-                onChange={(event) => setForm({ ...form, diagnosisId: event.target.value })}
-              >
-                {diagnoses.map((diagnosis) => (
-                  <option key={diagnosis.id} value={diagnosis.id}>
-                    {diagnosis.name} ({diagnosis.code})
-                  </option>
-                ))}
-              </Select>
+                options={diagnoses}
+                debounceMs={1000}
+                showOptionsWhenEmpty={false}
+                idleText=""
+                placeholder="Cari nama atau kode diagnosis..."
+                getOptionValue={(option) => option.id}
+                getOptionLabel={(option) => option.name}
+                getOptionDescription={(option) => option.code}
+                onChange={(diagnosisId) => setForm((current) => ({ ...current, diagnosisId }))}
+              />
               <FieldWarning>{formErrors.diagnosisId}</FieldWarning>
             </div>
 
@@ -198,36 +210,27 @@ export function ConsultationPage() {
                 <p className="mt-1 text-xs leading-5 text-slate-500">Pilih tindakan yang diberikan pada sesi konsultasi.</p>
                 <FieldWarning>{formErrors.treatmentIds}</FieldWarning>
               </div>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {treatments.map((treatment) => {
-                  const isSelected = form.treatmentIds.includes(treatment.id);
-
-                  return (
-                    <MotionItem
-                      as="label"
-                      index={treatments.indexOf(treatment)}
-                      key={treatment.id}
-                      className={`flex min-w-0 cursor-pointer items-start gap-3 rounded-md border p-3 text-sm transition ${
-                        isSelected
-                          ? "border-primary-500 bg-primary-50 text-primary-900 dark:border-[#48d6c9] dark:bg-[#0d3435] dark:text-primary-50"
-                          : "border-slate-200 bg-white text-slate-700 hover:border-primary-200 hover:bg-primary-50/60 dark:border-[#4a7378] dark:bg-[#101a1d] dark:text-slate-300 dark:hover:border-[#48d6c9] dark:hover:bg-[#0d3435]"
-                      }`}
-                    >
-                      <input
-                        checked={isSelected}
-                        className="mt-1 size-4 accent-primary-600"
-                        onChange={() => toggleTreatment(treatment.id)}
-                        type="checkbox"
-                      />
-                      <span className="min-w-0">
-                        <span className="block break-words font-medium">{treatment.name}</span>
-                        <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
-                          Rp {treatment.price.toLocaleString("id-ID")}
-                        </span>
-                      </span>
-                    </MotionItem>
-                  );
-                })}
+              <SearchableSelect
+                label="Cari biaya atau tindakan"
+                value={form.treatmentIds}
+                options={treatments}
+                multiple
+                debounceMs={1000}
+                showOptionsWhenEmpty={false}
+                idleText=""
+                placeholder="Cari nama tindakan..."
+                getOptionValue={(option) => option.id}
+                getOptionLabel={(option) => option.name}
+                getOptionDescription={(option) => `Rp ${option.price.toLocaleString("id-ID")}`}
+                onChange={toggleTreatment}
+              />
+              <div className="space-y-2">
+                {treatments.filter((item) => form.treatmentIds.includes(item.id)).map((item) => (
+                  <label key={item.id} className="flex items-center gap-3 text-sm">
+                    <input type="checkbox" checked onChange={() => toggleTreatment(item.id)} className="size-4 accent-primary-600" />
+                    <span>{item.name} - Rp {item.price.toLocaleString("id-ID")}</span>
+                  </label>
+                ))}
               </div>
             </MotionSection>
 
@@ -241,32 +244,79 @@ export function ConsultationPage() {
                 <Button className="w-full sm:w-auto" type="button" variant="outline" onClick={addMedicine}>Tambah Obat</Button>
               </div>
               {selectedMedicines.map((item, index) => (
-                <MotionItem key={index} index={index} className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_120px]">
-                  <Select
-                    value={item.medicineId}
-                    onChange={(event) => {
-                      const copy = [...selectedMedicines];
-                      copy[index] = { ...copy[index], medicineId: event.target.value };
-                      setSelectedMedicines(copy);
-                    }}
-                  >
-                    {medicines.map((medicine) => (
-                      <option key={medicine.id} value={medicine.id}>
-                        {medicine.name} - stok {medicine.stock}
-                      </option>
-                    ))}
-                  </Select>
-                  <Input
-                    min="1"
-                    placeholder="Jumlah"
-                    type="number"
-                    value={item.quantity}
-                    onChange={(event) => {
-                      const copy = [...selectedMedicines];
-                      copy[index] = { ...copy[index], quantity: Number(event.target.value) || 1 };
-                      setSelectedMedicines(copy);
-                    }}
-                  />
+                <MotionItem key={item.rowId} index={index} className="grid min-w-0 gap-3 rounded-md border border-slate-200 bg-slate-50/60 p-3 dark:border-[#35585e] dark:bg-[#101a1d]">
+                  <div className="min-w-0">
+                    <div className="min-w-0">
+                      <label className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-slate-300" htmlFor={`medicine-${index}`}>
+                        Pilih obat
+                      </label>
+                      <SearchableSelect
+                        id={`medicine-${index}`}
+                        value={item.medicineId}
+                        options={medicines}
+                        debounceMs={1000}
+                        showOptionsWhenEmpty={false}
+                        idleText=""
+                        placeholder="Cari nama obat..."
+                        inputActions={
+                          <>
+                            <Input
+                              className="w-16 shrink-0 px-2 sm:w-20"
+                              aria-label={`Kuantitas obat ${index + 1}`}
+                              title="Kuantitas"
+                              min="1"
+                              type="number"
+                              value={item.quantity}
+                              onChange={(event) => {
+                                const quantity = Number(event.target.value) || 1;
+                                setSelectedMedicines((current) => current.map((row) =>
+                                  row.rowId === item.rowId ? { ...row, quantity } : row
+                                ));
+                              }}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              className="size-9 shrink-0 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950"
+                              title="Hapus obat dari resep"
+                              aria-label={`Hapus obat ${index + 1} dari resep`}
+                              onClick={() => removeMedicine(index)}
+                            >
+                              <Trash2 className="size-4" />
+                            </Button>
+                          </>
+                        }
+                        getOptionValue={(option) => option.id}
+                        getOptionLabel={(option) => option.name}
+                        getOptionDescription={(option) => `Stok ${option.stock}`}
+                        onChange={(medicineId) => {
+                          setSelectedMedicines((current) => current.map((row) =>
+                            row.rowId === item.rowId ? { ...row, medicineId } : row
+                          ));
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="mb-1.5 flex items-center justify-between gap-3">
+                      <label className="text-xs font-medium text-slate-600 dark:text-slate-300" htmlFor={`medicine-instructions-${index}`}>
+                        Catatan aturan pakai
+                      </label>
+                      <span className="text-xs tabular-nums text-slate-400">{item.instructions.length}/200</span>
+                    </div>
+                    <Textarea
+                      className="min-h-20"
+                      id={`medicine-instructions-${index}`}
+                      maxLength={200}
+                      placeholder="Contoh: 3x1 sesudah makan, habiskan"
+                      value={item.instructions}
+                      onChange={(event) => {
+                        const copy = [...selectedMedicines];
+                        copy[index] = { ...copy[index], instructions: event.target.value };
+                        setSelectedMedicines(copy);
+                      }}
+                    />
+                  </div>
                 </MotionItem>
               ))}
             </MotionSection>
@@ -288,7 +338,9 @@ export function ConsultationPage() {
               <FieldWarning>{formErrors.notes}</FieldWarning>
             </div>
 
-            <Button className="w-full sm:w-auto" disabled={!isFormValid}>Selesaikan Konsultasi</Button>
+            <div className="flex justify-end">
+              <Button disabled={!isFormValid}>Selesaikan Konsultasi</Button>
+            </div>
           </form>
         </CardContent>
       </Card>

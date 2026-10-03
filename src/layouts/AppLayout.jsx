@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { CalendarCheck, ChevronsLeft, ChevronsRight, FileText, Home, LineChart, LogOut, Menu, Moon, Pill, QrCode, Stethoscope, Sun, Users, X } from "lucide-react";
+import { useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { CalendarCheck, ChevronsLeft, ChevronsRight, FileText, Home, LineChart, LogOut, Menu, Moon, Pill, QrCode, Sun, Users, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/Button";
@@ -12,7 +13,6 @@ const navItems = [
   { to: "/patients", label: "Pasien", icon: Users },
   { to: "/registration", label: "Registrasi", icon: CalendarCheck },
   { to: "/qr", label: "QR Pasien", icon: QrCode },
-  { to: "/queue", label: "Antrean", icon: Stethoscope },
   { to: "/pharmacy", label: "Farmasi", icon: Pill },
   { to: "/finance", label: "Finance", icon: LineChart },
   { to: "/invoice", label: "Tagihan", icon: FileText }
@@ -29,6 +29,31 @@ export function AppLayout() {
   const navigate = useNavigate();
   const shouldReduceMotion = useReducedMotion();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const mobileHeaderRef = useRef(null);
+  const [mobileMenuTop, setMobileMenuTop] = useState(72);
+
+  useLayoutEffect(() => {
+    if (!isMobileMenuOpen) return;
+
+    function updateMenuPosition() {
+      setMobileMenuTop(Math.max(8, (mobileHeaderRef.current?.getBoundingClientRect().bottom ?? 64) + 8));
+    }
+    function handleEscape(event) {
+      if (event.key === "Escape") setIsMobileMenuOpen(false);
+    }
+    updateMenuPosition();
+    const observer = new ResizeObserver(updateMenuPosition);
+    if (mobileHeaderRef.current) observer.observe(mobileHeaderRef.current);
+    window.addEventListener("resize", updateMenuPosition);
+    window.addEventListener("scroll", updateMenuPosition, true);
+    window.addEventListener("keydown", handleEscape);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateMenuPosition);
+      window.removeEventListener("scroll", updateMenuPosition, true);
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [isMobileMenuOpen]);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const isDarkMode = theme === "dark";
   const themeToggleButtonClass = isDarkMode
@@ -57,31 +82,19 @@ export function AppLayout() {
           isSidebarCollapsed ? "w-20" : "w-64"
         )}
       >
-        <div className={cn("flex h-16 shrink-0 items-center border-b border-white/15 dark:border-[#4a7378]", isSidebarCollapsed ? "justify-center px-3" : "gap-2 px-3")}>
-          <Button
-            type="button"
-            variant="ghost"
-            className={cn(
-              "size-9 shrink-0 px-0 text-primary-50/90 hover:bg-white/15 hover:text-white dark:text-[#d8fbf7] dark:hover:bg-[#0d3435] dark:hover:text-white",
-              isSidebarCollapsed && "mx-auto"
-            )}
-            title={isSidebarCollapsed ? "Perbesar sidebar" : "Perkecil sidebar"}
-            aria-label={isSidebarCollapsed ? "Perbesar sidebar" : "Perkecil sidebar"}
-            onClick={() => setIsSidebarCollapsed((current) => !current)}
-          >
-            {isSidebarCollapsed ? <ChevronsRight className="size-5" /> : <ChevronsLeft className="size-5" />}
-          </Button>
+        <div className={cn("flex h-16 shrink-0 items-center border-b border-white/15 dark:border-[#4a7378]", isSidebarCollapsed ? "justify-center px-3" : "gap-2 pl-4 pr-3")}>
+
           <AnimatePresence initial={false}>
             {!isSidebarCollapsed && (
             <motion.div
-              className="flex min-w-0 items-center gap-2"
+              className="flex min-w-0 flex-1 items-center gap-1"
               initial={shouldReduceMotion ? false : { opacity: 0, x: -8 }}
               animate={shouldReduceMotion ? undefined : { opacity: 1, x: 0 }}
               exit={shouldReduceMotion ? undefined : { opacity: 0, x: -8 }}
               transition={{ duration: 0.16, ease: "easeOut" }}
             >
-              <div className="grid size-9 shrink-0 place-items-center rounded-md bg-white text-primary-700 dark:bg-[#48d6c9] dark:text-[#071113]">
-                <Stethoscope className="size-5" />
+              <div className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-md bg-white p-1">
+                <img src="/logo.png" alt="" className="size-full object-contain" />
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-white">Sarana Medika</p>
@@ -90,6 +103,19 @@ export function AppLayout() {
             </motion.div>
             )}
           </AnimatePresence>
+          <Button
+            type="button"
+            variant="ghost"
+            className={cn(
+              "ml-auto size-9 shrink-0 px-0 text-primary-50/90 hover:bg-white/15 hover:text-white dark:text-[#d8fbf7] dark:hover:bg-[#0d3435] dark:hover:text-white",
+              isSidebarCollapsed && "mx-auto"
+            )}
+            title={isSidebarCollapsed ? "Perbesar sidebar" : "Perkecil sidebar"}
+            aria-label={isSidebarCollapsed ? "Perbesar sidebar" : "Perkecil sidebar"}
+            onClick={() => setIsSidebarCollapsed((current) => !current)}
+          >
+            {isSidebarCollapsed ? <ChevronsRight className="size-5" /> : <ChevronsLeft className="size-5" />}
+          </Button>
         </div>
         <nav aria-label="Navigasi utama" className={cn("min-h-0 flex-1 space-y-1 overflow-y-auto p-3", isSidebarCollapsed && "px-3")}>
           {navItems.map((item) => (
@@ -125,11 +151,19 @@ export function AppLayout() {
         </nav>
         <div
           className={cn(
-            "shrink-0 border-t border-primary-100 py-4 dark:border-[#35585e]",
+            "relative mt-5 shrink-0 py-4",
             isSidebarCollapsed ? "px-3" : "px-4"
           )}
           style={{ backgroundColor: sidebarPanelColor }}
         >
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 -top-5 h-5"
+            style={{
+              backgroundColor: sidebarPanelColor,
+              borderRadius: "70% 30% 0 0 / 100% 70% 0 0"
+            }}
+          />
           <div className="relative space-y-3">
           <div className={cn(isSidebarCollapsed && "grid place-items-center")}>
             {isSidebarCollapsed ? (
@@ -168,11 +202,11 @@ export function AppLayout() {
       </motion.aside>
 
       <main className={cn("min-w-0 max-w-full overflow-x-hidden transition-[padding-left] duration-200", isSidebarCollapsed ? "lg:pl-20" : "lg:pl-64")}>
-        <div className="sticky top-0 z-10 max-w-full border-b border-primary-100 bg-white/90 px-3 py-3 backdrop-blur dark:border-[#35585e] dark:bg-[#0e191c]/95 sm:px-4 lg:hidden">
+        <div ref={mobileHeaderRef} className="sticky top-0 z-10 max-w-full border-b border-primary-100 bg-white/90 px-3 py-3 backdrop-blur dark:border-[#35585e] dark:bg-[#0e191c]/95 sm:px-4 lg:hidden">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="grid size-8 place-items-center rounded-md bg-primary-600 text-white">
-                <Stethoscope size={17} />
+              <div className="grid size-8 place-items-center overflow-hidden rounded-md bg-white p-1">
+                <img src="/logo.png" alt="" className="size-full object-contain" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-slate-950 dark:text-slate-100">ClinicApp</p>
@@ -184,17 +218,18 @@ export function AppLayout() {
               className="size-9 px-0"
               aria-label={isMobileMenuOpen ? "Tutup navigasi" : "Buka navigasi"}
               aria-expanded={isMobileMenuOpen}
+              aria-controls="mobile-navigation-panel"
               onClick={() => setIsMobileMenuOpen((current) => !current)}
             >
               {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
             </Button>
           </div>
-          <AnimatePresence>
+          {createPortal(<AnimatePresence>
             {isMobileMenuOpen && (
               <motion.button
                 key="mobile-menu-overlay"
                 type="button"
-                className="fixed inset-0 top-[65px] z-10 cursor-default bg-transparent"
+                className="fixed inset-0 z-40 cursor-default bg-black/10 lg:hidden"
                 aria-label="Tutup menu navigasi"
                 initial={shouldReduceMotion ? false : { opacity: 0 }}
                 animate={shouldReduceMotion ? undefined : { opacity: 1 }}
@@ -206,7 +241,9 @@ export function AppLayout() {
             {isMobileMenuOpen && (
               <motion.div
                 key="mobile-menu-panel"
-                className="absolute left-3 right-3 top-[calc(100%+8px)] z-20 max-h-[calc(100dvh-5rem)] overflow-y-auto rounded-lg border border-primary-100 bg-white p-2 shadow-lg shadow-primary-950/10 dark:border-[#35585e] dark:bg-[#101a1d] dark:shadow-black/40 sm:left-4 sm:right-4"
+                id="mobile-navigation-panel"
+                style={{ top: mobileMenuTop, maxHeight: `calc(100dvh - ${mobileMenuTop + 12}px - env(safe-area-inset-bottom, 0px))` }}
+                className="fixed left-3 right-3 z-50 overflow-y-auto overscroll-contain rounded-lg border border-primary-100 bg-white p-2 shadow-lg shadow-primary-950/10 dark:border-[#35585e] dark:bg-[#101a1d] dark:shadow-black/40 sm:left-4 sm:right-4 lg:hidden"
                 initial={shouldReduceMotion ? false : { opacity: 0, y: -10, scale: 0.98 }}
                 animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
                 exit={shouldReduceMotion ? undefined : { opacity: 0, y: -8, scale: 0.98 }}
@@ -244,7 +281,7 @@ export function AppLayout() {
                 </div>
               </motion.div>
             )}
-          </AnimatePresence>
+          </AnimatePresence>, document.body)}
         </div>
         <div className="mx-auto min-w-0 w-full max-w-[1440px] px-3 py-4 sm:p-5 lg:p-6">
           <Outlet />

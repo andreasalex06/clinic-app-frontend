@@ -5,11 +5,12 @@ import { Button } from "../components/ui/Button";
 import { Card, CardContent, CardHeader } from "../components/ui/Card";
 import { MotionItem, PageMotion } from "../components/ui/Motion";
 import { formatQueueCode } from "../lib/queue";
+import { useDashboardSocketEvent } from "../hooks/useDashboardSocketEvent";
 
 const statusOptions = [
   { value: "", label: "Semua" },
   { value: "WAITING_PAYMENT", label: "Menunggu Bayar" },
-  { value: "PREPARING", label: "Diracik" },
+  { value: "PREPARING", label: "Sedang Diracik" },
   { value: "READY_FOR_PICKUP", label: "Siap Diambil" },
   { value: "COMPLETED", label: "Selesai" }
 ];
@@ -39,7 +40,9 @@ function getMedicineSummary(order) {
     return "Tidak ada obat";
   }
 
-  return medicines.map((item) => `${item.medicine.name} x${item.quantity}`).join(", ");
+  return medicines
+    .map((item) => `${item.medicine.name} x${item.quantity}${item.instructions ? ` - ${item.instructions}` : ""}`)
+    .join("; ");
 }
 
 export function PharmacyPage() {
@@ -49,8 +52,8 @@ export function PharmacyPage() {
   const [updatingId, setUpdatingId] = useState(null);
   const [error, setError] = useState("");
 
-  async function loadOrders(nextStatus = status) {
-    setLoading(true);
+  async function loadOrders(nextStatus = status, showLoading = true) {
+    if (showLoading) setLoading(true);
     setError("");
 
     try {
@@ -69,13 +72,15 @@ export function PharmacyPage() {
     void loadOrders();
   }, [status]);
 
+  useDashboardSocketEvent("pharmacy:changed", () => loadOrders(status, false));
+
   async function updateOrder(order, action) {
     setUpdatingId(order.id);
     setError("");
 
     try {
       await api.patch(`/pharmacy/${order.id}/${action}`);
-      await loadOrders();
+      await loadOrders(status, false);
     } catch {
       setError("Status farmasi gagal diperbarui.");
     } finally {
@@ -110,21 +115,29 @@ export function PharmacyPage() {
   return (
     <PageMotion>
       <Card>
-        <CardHeader className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+        <CardHeader className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
             <h1 className="page-title">Farmasi</h1>
             <p className="page-description">{orders.length} order obat ditemukan</p>
           </div>
-          <select
-            aria-label="Filter status farmasi"
-            className="h-10 min-w-0 w-full rounded-md border border-primary-200 bg-white px-3 text-sm text-slate-700 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-[#4a7378] dark:bg-[#101a1d] dark:text-slate-100 lg:w-48"
-            value={status}
-            onChange={(event) => setStatus(event.target.value)}
-          >
-            {statusOptions.map((option) => (
-              <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-          </select>
+          <div className="flex min-w-0 max-w-full gap-2 overflow-x-auto pb-1" role="group" aria-label="Filter status farmasi">
+            {statusOptions.map((option) => {
+              const isActive = status === option.value;
+
+              return (
+                <Button
+                  key={option.value}
+                  type="button"
+                  variant={isActive ? "primary" : "outline"}
+                  aria-pressed={isActive}
+                  className="h-9 shrink-0 whitespace-nowrap px-3 text-xs"
+                  onClick={() => setStatus(option.value)}
+                >
+                  {option.label}
+                </Button>
+              );
+            })}
+          </div>
         </CardHeader>
         <CardContent>
           {error && (

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { api } from "../api/client";
+import { disconnectDashboardSocket } from "../api/socket";
 
 export const useAuthStore = create((set, get) => ({
   user: null,
@@ -19,6 +20,7 @@ export const useAuthStore = create((set, get) => ({
       set({ user: response.data.data, loading: false });
     } catch {
       localStorage.removeItem("clinic_token");
+      disconnectDashboardSocket();
       set({ user: null, token: null, loading: false });
     }
   },
@@ -39,6 +41,7 @@ export const useAuthStore = create((set, get) => ({
 
   logout: () => {
     localStorage.removeItem("clinic_token");
+    disconnectDashboardSocket();
     set({ user: null, token: null, loading: false });
   }
 }));

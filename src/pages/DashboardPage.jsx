@@ -1,57 +1,47 @@
 import { Activity, CheckCircle2, Clock, FileWarning, Plus, UserCheck, UserX, Users } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
 import { MotionItem, MotionSection, PageMotion } from "../components/ui/Motion";
-import { formatQueueCode } from "../lib/queue";
+import { QueueSection } from "../components/QueueSection";
+import { QueueNotifications } from "../components/QueueNotifications";
+import { useDashboardSocketEvent } from "../hooks/useDashboardSocketEvent";
 import { useAuthStore } from "../stores/authStore";
-
-function formatVisitStatus(status) {
-  const labels = {
-    WAITING: "Menunggu",
-    IN_CONSULTATION: "Dalam konsultasi",
-    COMPLETED: "Selesai",
-    CANCELLED: "Dibatalkan"
-  };
-
-  return labels[status] ?? status;
-}
 
 export function DashboardPage() {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const [summary, setSummary] = useState(null);
-  const [visits, setVisits] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [doctorTab, setDoctorTab] = useState("ACTIVE");
   const [updatingDoctorId, setUpdatingDoctorId] = useState(null);
   const [doctorError, setDoctorError] = useState("");
 
-  useEffect(() => {
-    async function loadData() {
-      const [summaryResponse, visitsResponse, doctorsResponse] = await Promise.all([
-        api.get("/dashboard"),
-        api.get("/visits?date=today"),
-        api.get("/doctors")
-      ]);
+  const loadData = useCallback(async () => {
+    const [summaryResponse, doctorsResponse] = await Promise.all([
+      api.get("/dashboard"),
+      api.get("/doctors")
+    ]);
 
-      setSummary(summaryResponse.data.data);
-      setVisits(visitsResponse.data.data);
-      setDoctors(doctorsResponse.data.data);
-    }
-
-    void loadData();
+    setSummary(summaryResponse.data.data);
+    setDoctors(doctorsResponse.data.data);
   }, []);
+
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
+
+  useDashboardSocketEvent("queue:changed", loadData);
+  useDashboardSocketEvent("pharmacy:changed", loadData);
 
   const cards = [
     {
       label: "Kunjungan",
       value: summary?.todayVisits ?? 0,
       icon: Users,
-      iconClass: "text-teal-600 dark:text-teal-300",
-      isPrimary: true
+      iconClass: "text-teal-600 dark:text-teal-300"
     },
     {
       label: "Menunggu",
@@ -78,8 +68,6 @@ export function DashboardPage() {
       iconClass: "text-rose-600 dark:text-rose-300"
     }
   ];
-  const displayedVisits = visits.slice(0, 5);
-  const hiddenVisitsCount = Math.max(visits.length - displayedVisits.length, 0);
   const activeDoctors = doctors.filter((doctor) => doctor.isActive !== false);
   const inactiveDoctors = doctors.filter((doctor) => doctor.isActive === false);
   const displayedDoctors = doctorTab === "ACTIVE" ? activeDoctors : inactiveDoctors;
@@ -103,7 +91,8 @@ export function DashboardPage() {
 
   return (
     <PageMotion>
-      <div className="min-w-0 space-y-7 bg-white px-4 py-5 dark:bg-[#101a1d] sm:px-5 sm:py-6 lg:px-6 lg:py-7">
+      <QueueNotifications />
+      <div className="min-w-0 space-y-7 rounded-lg bg-white px-4 py-5 dark:bg-[#101a1d] sm:px-5 sm:py-6 lg:px-6 lg:py-7">
           <MotionSection className="flex min-w-0 flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div className="min-w-0">
               <h1 className="text-xl font-semibold leading-8 text-slate-950 dark:text-slate-100 sm:text-2xl">Dashboard</h1>
@@ -112,12 +101,12 @@ export function DashboardPage() {
             <Button className="w-full sm:w-auto" onClick={() => navigate("/registration")}><Plus className="size-4" />Registrasi Baru</Button>
           </MotionSection>
 
-          <div className="grid min-w-0 grid-cols-2 gap-3 lg:grid-cols-5">
+          <div aria-label="Metrik dashboard" className="grid min-w-0 grid-cols-2 gap-3 md:grid-cols-5">
             {cards.map((item, index) => (
               <MotionItem
                 key={item.label}
                 index={index}
-                className={`h-full rounded-md border border-slate-200 bg-white shadow-sm shadow-slate-950/5 dark:border-[#35585e] dark:bg-[#0b2324] ${item.isPrimary ? "col-span-2 lg:col-span-1" : ""}`}
+                className="h-full rounded-md border border-slate-200 bg-white shadow-sm shadow-slate-950/5 dark:border-[#35585e] dark:bg-[#0b2324]"
               >
                 <div className="flex min-h-20 min-w-0 items-center px-3 py-3 min-[360px]:px-4">
                   <div className="min-w-0 w-full">
@@ -132,86 +121,7 @@ export function DashboardPage() {
             ))}
           </div>
 
-          <section className="border-t border-slate-200 pt-6 dark:border-[#35585e] sm:pt-7">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold leading-7 text-slate-950 dark:text-slate-100">Antrean Hari Ini</h2>
-            {hiddenVisitsCount > 0 && (
-              <p className="mt-1 text-sm text-slate-500">
-                Menampilkan 5 dari {visits.length} antrean.
-              </p>
-            )}
-          </div>
-          {visits.length > 5 && (
-            <Button className="w-full sm:w-auto" variant="outline" onClick={() => navigate("/queue")}>
-              Lihat semua antrean
-            </Button>
-          )}
-            </div>
-            <div className="mt-4">
-          {visits.length === 0 ? (
-            <div className="rounded-md border border-dashed border-primary-200 bg-primary-50/60 p-6 text-center text-sm text-slate-500">
-              Belum ada kunjungan hari ini.
-            </div>
-          ) : (
-            <>
-          <div className="hidden overflow-x-auto rounded-md border border-primary-100 md:block">
-            <table className="data-table min-w-[640px]">
-              <thead className="bg-primary-50/80 text-xs text-primary-700">
-                <tr>
-                  <th className="w-[12%] px-4 py-3 font-medium">No.</th>
-                  <th className="w-[30%] px-4 py-3 font-medium">Pasien</th>
-                  <th className="w-[16%] px-4 py-3 font-medium">Waktu</th>
-                  <th className="w-[25%] px-4 py-3 font-medium">Dokter</th>
-                  <th className="w-[17%] px-4 py-3 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {displayedVisits.map((visit, index) => (
-                  <MotionItem key={visit.id} as="tr" index={index} className={index % 2 === 0 ? "bg-white align-middle" : "bg-slate-50/60 align-middle"}>
-                    <td className="whitespace-nowrap border-t border-slate-100 px-4 py-3 align-middle font-medium tabular-nums text-primary-700">{formatQueueCode(visit.queueNumber)}</td>
-                    <td className="border-t border-slate-100 px-4 py-3 align-middle font-medium text-slate-900"><p className="break-words">{visit.patient.name}</p></td>
-                    <td className="border-t border-slate-100 px-4 py-3 align-middle text-slate-600">{new Date(visit.checkInTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</td>
-                    <td className="border-t border-slate-100 px-4 py-3 align-middle text-slate-600"><p className="break-words">{visit.doctor.name}</p></td>
-                    <td className="border-t border-slate-100 px-4 py-3 align-middle">
-                      <div className="flex items-center">
-                      <Badge tone={visit.status === "COMPLETED" ? "green" : visit.status === "WAITING" ? "amber" : "primary"}>
-                        {formatVisitStatus(visit.status)}
-                      </Badge>
-                      </div>
-                    </td>
-                  </MotionItem>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="grid gap-3 md:hidden">
-            {displayedVisits.map((visit, index) => (
-              <MotionItem key={visit.id} index={index} className="min-w-0 rounded-md border border-primary-100 bg-white p-4">
-                <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-start gap-3">
-                    <div className="grid h-10 min-w-16 shrink-0 place-items-center whitespace-nowrap rounded-md bg-primary-50 px-2 text-sm font-medium tabular-nums text-primary-700">
-                      {formatQueueCode(visit.queueNumber)}
-                    </div>
-                    <div className="min-w-0">
-                      <h3 className="break-words text-sm font-medium text-slate-950">{visit.patient.name}</h3>
-                      <p className="mt-1 break-words text-sm text-slate-500">{visit.doctor.name}</p>
-                    </div>
-                </div>
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3">
-                  <p className="text-xs tabular-nums text-slate-500">
-                    {new Date(visit.checkInTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                  <Badge tone={visit.status === "COMPLETED" ? "green" : visit.status === "WAITING" ? "amber" : "primary"}>
-                    {formatVisitStatus(visit.status)}
-                  </Badge>
-                </div>
-              </MotionItem>
-            ))}
-          </div>
-            </>
-          )}
-            </div>
-          </section>
+          <QueueSection />
 
           <section className="border-t border-slate-200 pt-6 dark:border-[#35585e] sm:pt-7">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
