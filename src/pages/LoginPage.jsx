@@ -15,7 +15,8 @@ export function LoginPage() {
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
   const navigate = useNavigate();
   const [email, setEmail] = useState("admin@clinic.test");
-  const [password, setPassword] = useState("password123");
+  // Public demo credentials only; never use this account for real patient data.
+  const [password, setPassword] = useState("n4epwgPN8y4KVerPe5_xPs58");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const isDarkMode = theme === "dark";
